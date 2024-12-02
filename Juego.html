@@ -177,6 +177,12 @@
                 const specialFont = "30px Arial";
                 drawTextWithBorder(specialMessage, specialFont, "#FF6347", "black", canvas.width / 2 - 200, canvas.height / 2);
             }
+
+            // Mostrar el mensaje de victoria cuando el jugador llega a la puntuación de victoria
+            if (score >= 400) {
+                const victoryFont = "40px Arial";
+                drawTextWithBorder("¡Ganaste! Usa el código AXMP-LS78K2-39AR", victoryFont, "#32CD32", "black", canvas.width / 2 - 300, canvas.height / 2);
+            }
         }
 
         // Función principal para el juego
