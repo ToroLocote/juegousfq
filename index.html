@@ -128,7 +128,7 @@
             // Comprobar colisiones con los regalos
             for (let i = 0; i < fallingGoals.length; i++) {
                 if (fallingGoals[i].x < playerX + playerWidth && fallingGoals[i].x + giftWidth > playerX && fallingGoals[i].y < playerY + playerHeight && fallingGoals[i].y + giftHeight > playerY) {
-                    score += 10;
+                    score += 1;
                     fallingGoals.splice(i, 1);  // Eliminar el regalo de la pantalla
                 }
             }
