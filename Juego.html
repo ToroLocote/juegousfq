@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego Navideño</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        canvas {
+            display: block;
+            margin: auto;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+        // Obtener el canvas y su contexto
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Definir los tamaños de los objetos
+        const playerWidth = 50;
+        const playerHeight = 50;
+        const giftWidth = 40;
+        const giftHeight = 40;
+        const harmfulWidth = 40;
+        const harmfulHeight = 40;
+
+        // Posición inicial del jugador
+        let playerX = canvas.width / 2 - playerWidth / 2;
+        let playerY = canvas.height - playerHeight - 10;
+        const playerSpeed = 5;
+
+        // Variables para puntuación y vidas
+        let score = 0;
+        let lives = 3;
+
+        // Lista de correos permitidos
+        const allowedEmails = [
+            "aialvarezm@estud.usfq.edu.ec", "kandradeh@estud.usfq.edu.ec", "jbarrigam@estud.usfq.edu.ec", 
+            "dcancan-proceso@estud.usfq.edu.ec", "mcarrascot@estud.usfq.edu.ec", "sjendara@estud.usfq.edu.ec",
+            "dsgavilanesr@estud.usfq.edu.ec", "jgrandesd@estud.usfq.edu.ec", "nherediah@estud.usfq.edu.ec", 
+            "dajimenezv@estud.usfq.edu.ec", "flopez@estud.usfq.edu.ec", "vmantilla@estud.usfq.edu.ec",
+            "mmogollon@estud.usfq.edu.ec", "smontero@estud.usfq.edu.ec", "jnajera@asig.com.ec", 
+            "jpatino@estud.usfq.edu.ec", "fpazmino@estud.usfq.edu.ec", "cpenaherrera@estud.usfq.edu.ec", 
+            "dpilcog@estud.usfq.edu.ec", "jrestrepoj@estud.usfq.edu.ec", "msalgado@estud.usfq.edu.ec", 
+            "mtoro@estud.usfq.edu.ec", "dayepezc@estud.usfq.edu.ec", "jxyepezr@estud.usfq.edu.ec"
+        ];
+
+        // Variables de correo y mensaje especial
+        let userEmail = prompt("Por favor, ingresa tu correo USFQ:"); // Solicitar el correo al usuario
+        let specialMessage = ""; // Mensaje especial
+
+        // Verificar si el correo es válido y si es el correo especial
+        if (allowedEmails.includes(userEmail)) {
+            if (userEmail === "vmantilla@estud.usfq.edu.ec") {
+                specialMessage = "¡Feliz Navidad Victoria! Corre y usa el código antes de que alguien te gane";
+            }
+        } else {
+            alert("Acceso Denegado: Tu correo no está autorizado para jugar.");
+            document.location.reload();  // Recargar la página si el correo no es válido
+        }
+
+        // Cargar las imágenes
+        const floorTexture = new Image();
+        const playerTexture = new Image();
+        const harmfulTexture = new Image();
+        const goalTexture = new Image();
+
+        // Ruta de las imágenes en la carpeta 'assets/images'
+        floorTexture.src = "assets/images/Nieve.png";
+        playerTexture.src = "assets/images/chill-guy.png";
+        harmfulTexture.src = "assets/images/coal.png";
+        goalTexture.src = "assets/images/gift_card.png";
+
+        // Listas de objetos en pantalla
+        let fallingGoals = [];
+        let fallingHarmful = [];
+
+        // Función para dibujar texto con borde (para la puntuación y las vidas)
+        function drawTextWithBorder(text, font, color, borderColor, x, y) {
+            ctx.font = font;
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 5;
+            ctx.strokeText(text, x, y);
+            ctx.fillStyle = color;
+            ctx.fillText(text, x, y);
+        }
+
+        // Generar nuevos objetos
+        function generateObjects() {
+            if (Math.random() < 0.02) {
+                fallingGoals.push({ x: Math.random() * canvas.width, y: 0 });
+            }
+
+            if (Math.random() < 0.02) {
+                fallingHarmful.push({ x: Math.random() * canvas.width, y: 0 });
+            }
+        }
+
+        // Actualizar la posición de los objetos
+        function updateObjects() {
+            for (let i = 0; i < fallingGoals.length; i++) {
+                fallingGoals[i].y += 3;
+                if (fallingGoals[i].y > canvas.height) {
+                    fallingGoals.splice(i, 1);
+                }
+            }
+
+            for (let i = 0; i < fallingHarmful.length; i++) {
+                fallingHarmful[i].y += 5;
+                if (fallingHarmful[i].y > canvas.height) {
+                    fallingHarmful.splice(i, 1);
+                }
+            }
+        }
+
+        // Detectar colisiones entre el jugador y los objetos
+        function checkCollisions() {
+            // Comprobar colisiones con los regalos
+            for (let i = 0; i < fallingGoals.length; i++) {
+                if (fallingGoals[i].x < playerX + playerWidth && fallingGoals[i].x + giftWidth > playerX && fallingGoals[i].y < playerY + playerHeight && fallingGoals[i].y + giftHeight > playerY) {
+                    score += 10;
+                    fallingGoals.splice(i, 1);  // Eliminar el regalo de la pantalla
+                }
+            }
+
+            // Comprobar colisiones con los elementos dañinos
+            for (let i = 0; i < fallingHarmful.length; i++) {
+                if (fallingHarmful[i].x < playerX + playerWidth && fallingHarmful[i].x + harmfulWidth > playerX && fallingHarmful[i].y < playerY + playerHeight && fallingHarmful[i].y + harmfulHeight > playerY) {
+                    lives -= 1;
+                    fallingHarmful.splice(i, 1);  // Eliminar el obstáculo de la pantalla
+                    if (lives <= 0) {
+                        alert("Game Over");
+                        document.location.reload();  // Recargar el juego cuando las vidas lleguen a 0
+                    }
+                }
+            }
+        }
+
+        // Función para dibujar todos los elementos del juego
+        function drawGame() {
+            // Limpiar el canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar el fondo (Nieve)
+            ctx.drawImage(floorTexture, 0, 0, canvas.width, canvas.height);
+
+            // Dibujar el jugador
+            ctx.drawImage(playerTexture, playerX, playerY, playerWidth, playerHeight);
+
+            // Dibujar los regalos (goalTexture)
+            for (let i = 0; i < fallingGoals.length; i++) {
+                ctx.drawImage(goalTexture, fallingGoals[i].x, fallingGoals[i].y, giftWidth, giftHeight);
+            }
+
+            // Dibujar los obstáculos (harmfulTexture)
+            for (let i = 0; i < fallingHarmful.length; i++) {
+                ctx.drawImage(harmfulTexture, fallingHarmful[i].x, fallingHarmful[i].y, harmfulWidth, harmfulHeight);
+            }
+
+            // Mostrar puntuación y vidas
+            const font = "30px Arial";
+            drawTextWithBorder(`Puntuación: ${score}`, font, "#00FFFF", "black", 10, 30);
+            drawTextWithBorder(`Vidas: ${lives}`, font, "#00FFFF", "black", 10, 70);
+
+            // Mostrar el mensaje especial si el correo es el correcto
+            if (specialMessage !== "") {
+                const specialFont = "30px Arial";
+                drawTextWithBorder(specialMessage, specialFont, "#FF6347", "black", canvas.width / 2 - 200, canvas.height / 2);
+            }
+        }
+
+        // Función principal para el juego
+        function gameLoop() {
+            generateObjects();
+            updateObjects();
+            checkCollisions();
+            drawGame();
+
+            requestAnimationFrame(gameLoop);  // Llamar a la siguiente iteración de la animación
+        }
+
+        // Manejo del movimiento del jugador
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowLeft" && playerX > 0) {
+                playerX -= playerSpeed;
+            } else if (event.key === "ArrowRight" && playerX < canvas.width - playerWidth) {
+                playerX += playerSpeed;
+            }
+        });
+
+        // Iniciar el juego
+        gameLoop();
+    </script>
+</body>
+</html>
